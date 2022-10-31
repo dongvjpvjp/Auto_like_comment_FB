@@ -14,8 +14,8 @@ process.stdin.setRawMode(true);
 const config = {
 	"email": "account",
 	"pass": "password",
-	"interval": 3000,
-	"timeout": 2000,
+	"interval": 30000,
+	"delay": 5000,
 	"tds_token": `TDS0nI4IXZ2V2ciojIyVmdlNnIsICcqZHcqZ3Zu9GZiojIyV2c1Jye`,
 };
 /* ^^^^^^^^^^^^^[CẤU HÌNH NỘI DUNG]^^^^^^^^^^^^^ */
@@ -48,8 +48,8 @@ const driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.c
 		process.stdin.on('keypress', (str, key) => {
 			if (str == 'Y') {
 				console.log('Bắt đầu chạy')
-				setInterval(async () => {
-					await main();
+				setInterval( () => {
+					 main();
 				}, config.interval)
 				// main();
 			}
@@ -106,7 +106,7 @@ async function like(id, type) {
 		const like_button = await findbyCSS("a[href*='/a/like.php']:first-of-type");
 		await like_button.click();
 		console.log('Truy cập và like bài viết', id)
-		await getCoin(type, id);
+		getCoin(type, id);
 	}
 	catch (err) {
 		console.log('err', err);
@@ -122,29 +122,30 @@ async function cmt(id, msg) {
 		let cmt_button = await findbyCSS("input[value='Bình luận']:first-of-type");
 		await cmt_button.click();
 		console.log('Truy cập và cmt bài viết', id, 'với msg', msg)
-		await getCoin('comment', id);
+		getCoin('comment', id);
 	} catch (err) {
 		console.log('err', err);
 	}
 }
 
 async function handler(type) {
-	setTimeout(async () => {
-		try {
-			let list = await axios.get(`https://traodoisub.com/api/?fields=${type}&access_token=${config.tds_token}`)
-			if (!list?.data?.length) {
-				console.log('Chạy API Lấy danh sách nhiệm vụ facebook thất bại', type, list.data);
-				return false
-			}
-			console.log('Chạy API Lấy danh sách nhiệm vụ facebook, response', type, list.data);
-			for await (let item of list.data) {
-				if (type == 'comment') await cmt(item.id, item.msg)
-				else await like(item.id, type)
-			}
-		} catch (ex) {
-			console.log('err', ex)
+	try {
+		let list = await axios.get(`https://traodoisub.com/api/?fields=${type}&access_token=${config.tds_token}`)
+		if (!list?.data?.length) {
+			console.log('Chạy API Lấy danh sách nhiệm vụ facebook thất bại', type, list.data);
+			return false
 		}
-	}, config.timeout);
+		console.log('Chạy API Lấy danh sách nhiệm vụ facebook, response', type, list.data);
+		let i = 1;
+		for (let item of list.data) {
+			setTimeout(async () => {
+				if (type == 'comment') cmt(item.id, item.msg)
+				else like(item.id, type)
+			}, i++ * config.delay)
+		}
+	} catch (ex) {
+		console.log('err', ex)
+	}
 }
 async function getCoin(type, id) {
 	try {
@@ -153,9 +154,7 @@ async function getCoin(type, id) {
 	} catch (ex) {
 		console.log('err', ex)
 		console.log('Chạy API nhận xu thất bại, response', res.data);
-		setTimeout(async () => {
-			await getCoin(type, id)
-		}, config.timeout);
+		getCoin(type, id)
 	}
 }
 async function main() {
