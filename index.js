@@ -48,6 +48,7 @@ const driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.c
 		process.stdin.on('keypress', (str, key) => {
 			if (str == 'Y') {
 				console.log('Bắt đầu chạy')
+				main();
 				setInterval( () => {
 					 main();
 				}, config.interval)
