@@ -144,6 +144,7 @@ async function handler(type) {
 				else like(item.id, type)
 			}, i++ * config.delay)
 		}
+		return true;
 	} catch (ex) {
 		console.log('err', ex)
 	}
