@@ -107,7 +107,7 @@ async function like(id, type) {
 		const like_button = await findbyCSS("a[href*='/a/like.php']:first-of-type");
 		await like_button.click();
 		console.log('Truy cập và like bài viết', id)
-		getCoin(type, id);
+		await getCoin(type, id);
 	}
 	catch (err) {
 		console.log('err', err);
@@ -123,7 +123,7 @@ async function cmt(id, msg) {
 		let cmt_button = await findbyCSS("input[value='Bình luận']:first-of-type");
 		await cmt_button.click();
 		console.log('Truy cập và cmt bài viết', id, 'với msg', msg)
-		getCoin('comment', id);
+		await getCoin('comment', id);
 	} catch (err) {
 		console.log('err', err);
 	}
@@ -138,11 +138,11 @@ async function handler(type) {
 		}
 		console.log('Chạy API Lấy danh sách nhiệm vụ facebook, response', type, list.data);
 		let i = 1;
-		for (let item of list.data) {
-			setTimeout(async () => {
-				if (type == 'comment') cmt(item.id, item.msg)
-				else like(item.id, type)
-			}, i++ * config.delay)
+		for await (let item of list.data) {
+			// setTimeout(async () => {
+				if (type == 'comment') await cmt(item.id, item.msg)
+				else await like(item.id, type)
+			// }, i++ * config.delay)
 		}
 		return true;
 	} catch (ex) {
@@ -156,7 +156,7 @@ async function getCoin(type, id) {
 	} catch (ex) {
 		console.log('err', ex)
 		console.log('Chạy API nhận xu thất bại, response', res.data);
-		getCoin(type, id)
+		await getCoin(type, id)
 	}
 }
 async function main() {
