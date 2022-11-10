@@ -8,12 +8,13 @@ const axios = require('axios');
 const readline = require('readline');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
-
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
 
 /* vvvvvvvvvvvv[CẤU HÌNH NỘI DUNG]vvvvvvvvvvvvvv */
-const config = {
-	"email": "account",
-	"pass": "password",
+var config = {
 	"interval": 30000,
 	"delay": 5000,
 	"tds_token": `TDS0nI4IXZ2V2ciojIyVmdlNnIsICcqZHcqZ3Zu9GZiojIyV2c1Jye`,
@@ -21,7 +22,7 @@ const config = {
 /* ^^^^^^^^^^^^^[CẤU HÌNH NỘI DUNG]^^^^^^^^^^^^^ */
 
 /* vvvvvvvvvvvv[CẤU HÌNH HTML]vvvvvvvvvvvvvv */
-const login_link = 'https://mbasic.facebook.com/login';
+const login_link = 'https://facebook.com';
 
 /* ^^^^^^^^^^^^[CẤU HÌNH HTML]^^^^^^^^^^^^^^ */
 
@@ -33,38 +34,32 @@ const driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.c
 
 (async function example() { // Khởi tạo quá trình bất đồng bộ
 	try {
-		/*  */
-		/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
-		await visit(login_link);	// Mở trang đăng nhập
-		const emailInput = await findByName('email');	// tìm vị trí nhập email
-		const passInput = await findByName('pass');	// tìm vị trí nhập password
-		const loginButton = await findByName('login');	// tìm vị trí nút login
-		await write(emailInput, config.email);	//Điền email
-		await write(passInput, config.pass);	// Điền password
-		await loginButton.click(); // Nhấp đăng nhập
 
 		/* ^^^^^^^^^^^^^^[XỬ LÝ AUTO LIKE / CMT]^^^^^^^^^^^^ */
-		console.log('Thực hiện tác vụ Y/N ')
-		process.stdin.on('keypress', (str, key) => {
-			if (str == 'Y') {
-				console.log('Bắt đầu chạy')
-				main();
-				setInterval( () => {
-					 main();
-				}, config.interval)
-				// main();
-			}
-		})
+		rl.question("Nhập chuỗi Token:", async function (name) {
+			config.tds_token = name;
+			console.log('Chuỗi token của bạn là:', config.tds_token)
+			console.log('Thực hiện tác vụ kết nối Facebook (Y/N)')
+			process.stdin.on('keypress', async (str, key) => {
+				if (str == 'Y') {
 
+					console.log('\n Mở kết nối tài khoản facebook');
+					/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
+					await visit(login_link);	// Mở trang đăng nhập
+					/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
+					setInterval(() => {
+						main();
+					}, config.interval)
+					rl.close();
 
-	} finally {
-		// quit();	// Thoát trình duyệt 
-		process.stdin.on('keypress', (str, key) => {
-			if (str == 'N') {
-				console.log('Ngưng hệ thống')
-				quit();
-			}
-		})
+				}
+			})
+
+		});
+
+	}
+	catch (ex) {
+		console.log("Đã xảy ra lỗi: ", ex.toString())
 	}
 })();
 
@@ -139,10 +134,8 @@ async function handler(type) {
 		console.log('Chạy API Lấy danh sách nhiệm vụ facebook, response', type, list.data);
 		let i = 1;
 		for await (let item of list.data) {
-			// setTimeout(async () => {
-				if (type == 'comment') await cmt(item.id, item.msg)
-				else await like(item.id, type)
-			// }, i++ * config.delay)
+			if (type == 'comment') await cmt(item.id, item.msg)
+			else await like(item.id, type)
 		}
 		return true;
 	} catch (ex) {
@@ -160,8 +153,8 @@ async function getCoin(type, id) {
 	}
 }
 async function main() {
-	// let res = await handler(`comment`);
-	let res = await handler(`like`);
+	let res = await handler(`comment`);
+	if (!res) res = await handler(`like`);
 	if (!res) res = await handler(`likegiare`);
 	if (!res) res = await handler(`likesieure`);
 }
