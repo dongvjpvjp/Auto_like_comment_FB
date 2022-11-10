@@ -36,17 +36,20 @@ const driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.c
 	try {
 
 		/* ^^^^^^^^^^^^^^[XỬ LÝ AUTO LIKE / CMT]^^^^^^^^^^^^ */
-		rl.question("Nhập chuỗi Token:", async function (name) {
+		rl.question("Nhập chuỗi Token: ", async function (name) {
+
 			config.tds_token = name;
-			console.log('Chuỗi token của bạn là:', config.tds_token)
-			console.log('Thực hiện tác vụ kết nối Facebook (Y/N)')
+			console.log('Chuỗi token của bạn là: ', config.tds_token)
+			/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
+			await visit(login_link);	// Mở trang đăng nhập
+			/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
+			console.log('Thực hiện tác vụ kết nối Facebook (Y/N): ')
+
 			process.stdin.on('keypress', async (str, key) => {
 				if (str == 'Y') {
 
 					console.log('\n Mở kết nối tài khoản facebook');
-					/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
-					await visit(login_link);	// Mở trang đăng nhập
-					/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
+					main();
 					setInterval(() => {
 						main();
 					}, config.interval)
