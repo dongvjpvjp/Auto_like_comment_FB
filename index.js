@@ -14,9 +14,10 @@ const rl = readline.createInterface({
 });
 
 /* vvvvvvvvvvvv[CẤU HÌNH NỘI DUNG]vvvvvvvvvvvvvv */
+const target_time = 1800000 //30 mins
 var config = {
-	"interval": 30000,
-	"delay": 5000,
+	"interval": 60000,
+	"target_date": new Date().getTime() + target_time,
 	"tds_token": `TDS0nI4IXZ2V2ciojIyVmdlNnIsICcqZHcqZ3Zu9GZiojIyV2c1Jye`,
 };
 /* ^^^^^^^^^^^^^[CẤU HÌNH NỘI DUNG]^^^^^^^^^^^^^ */
@@ -34,27 +35,37 @@ const driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.c
 
 (async function example() { // Khởi tạo quá trình bất đồng bộ
 	try {
+		
+		/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
+		await visit(login_link);	// Mở trang đăng nhập
+		/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
 
-		/* ^^^^^^^^^^^^^^[XỬ LÝ AUTO LIKE / CMT]^^^^^^^^^^^^ */
+		/* ^^^^^^^^^^^^^^[XỬ LÝ INPUT]^^^^^^^^^^^^ */
 		rl.question("Nhập chuỗi Token: ", async function (name) {
 
 			config.tds_token = name;
 			console.log('Chuỗi token của bạn là: ', config.tds_token)
-			/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
-			await visit(login_link);	// Mở trang đăng nhập
-			/* vvvvvvvvvvvvv[XỬ LÝ ĐĂNG NHẬP]vvvvvvvvvvvvv */
 			console.log('Thực hiện tác vụ kết nối Facebook (Y/N): ')
 
 			process.stdin.on('keypress', async (str, key) => {
 				if (str == 'Y') {
-
+					/* vvvvvvvvvvvvv[XỬ LÝ TÁC VỤ AUTO LIKE/CMT - chạy target_time / nghỉ target_time]vvvvvvvvvvvvv */
 					console.log('\n Mở kết nối tài khoản facebook');
 					main();
 					setInterval(() => {
-						main();
+						let now_date = new Date().getTime();
+						if (now_date > config.target_date + target_time) {
+							config.target_date += (target_time * 3)
+							console.log('Reset Interval Function');
+						} else if (now_date > config.target_date) console.log('Skip Interval Function');
+						else if (now_date < config.target_date) {
+							console.log('Interval Function Running')
+							main();
+						}
+
 					}, config.interval)
 					rl.close();
-
+					/* vvvvvvvvvvvvv[XỬ LÝ TÁC VỤ AUTO LIKE/CMT - chạy target_time / nghỉ target_time]vvvvvvvvvvvvv */
 				}
 			})
 
