@@ -43,7 +43,7 @@ const driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.c
 		/* ^^^^^^^^^^^^^^[XỬ LÝ INPUT]^^^^^^^^^^^^ */
 		rl.question("Nhập chuỗi Token: ", async function (name) {
 
-			config.tds_token = name;
+			if(name!='') config.tds_token = name;
 			console.log('Chuỗi token của bạn là: ', config.tds_token)
 			console.log('Thực hiện tác vụ kết nối Facebook (Y/N): ')
 
