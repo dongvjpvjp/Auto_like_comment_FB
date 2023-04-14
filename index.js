@@ -168,7 +168,8 @@ async function getCoin(type, id) {
 }
 async function main() {
 	// let res = await handler(`comment`);
-	let res = await handler(`like`);
+	let res = await handler(`likevip`);
+	if (!res) res = await handler(`like`);
 	if (!res) res = await handler(`likegiare`);
 	if (!res) res = await handler(`likesieure`);
 }
